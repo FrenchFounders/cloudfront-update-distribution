@@ -22,6 +22,9 @@ async function cleanup(): Promise<void> {
     core.exportVariable("aws-region", "");
     core.exportVariable("cloudfront-distribution-id", "");
     core.exportVariable("cloudfront-distribution-config", "");
+    core.exportVariable("cloudfront-invalidation-required", false);
+    core.exportVariable("cloudfront-invalidation-path", "");
+    core.exportVariable("cloudfront-wait-for-service-update", true);
   } catch (error) {
     core.setFailed(error.message);
   }

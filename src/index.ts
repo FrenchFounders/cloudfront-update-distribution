@@ -1,5 +1,12 @@
 import * as core from "@actions/core";
-import { CloudFrontClient, DistributionConfig, GetDistributionCommand, UpdateDistributionCommand } from "@aws-sdk/client-cloudfront";
+import {
+  CloudFrontClient,
+  DistributionConfig,
+  GetDistributionCommand,
+  UpdateDistributionCommand,
+  waitUntilDistributionDeployed,
+  CreateInvalidationCommand,
+} from "@aws-sdk/client-cloudfront";
 import deepmerge from "deepmerge";
 
 const combineMerge = <T = { Id?: string }>(target: T[], source: T[]) => {
@@ -33,6 +40,9 @@ async function run(): Promise<void> {
       required: true,
     });
     const distributionConfigString = core.getInput("cloudfront-distribution-config", { required: true });
+    const cloudfrontInvalidationRequired = core.getBooleanInput("cloudfront-invalidation-required", { required: false }) || false;
+    const cloudfrontInvalidationPath = core.getInput("cloudfront-invalidation-path", { required: false }) || "/*";
+    const cloudfrontWaitForServiceUpdate = core.getBooleanInput("cloudfront-wait-for-service-update", { required: false }) || true;
 
     const client = new CloudFrontClient({
       credentials: { accessKeyId, secretAccessKey },
@@ -61,6 +71,19 @@ async function run(): Promise<void> {
     });
     const distributionOutput = await client.send(updateDistribution);
     core.setOutput("cloudfront-distribution-updated-id", distributionOutput.Distribution?.Id);
+
+    if (cloudfrontWaitForServiceUpdate) {
+      await waitUntilDistributionDeployed({ client, maxWaitTime: 10 * 60 * 60 }, { Id: distributionOutput.Distribution?.Id });
+    }
+
+    if (cloudfrontInvalidationRequired) {
+      await client.send(
+        new CreateInvalidationCommand({
+          DistributionId: distributionOutput.Distribution?.Id,
+          InvalidationBatch: { CallerReference: new Date().toISOString(), Paths: { Quantity: 1, Items: [cloudfrontInvalidationPath] } },
+        })
+      );
+    }
   } catch (error) {
     core.setFailed(error.message);
 

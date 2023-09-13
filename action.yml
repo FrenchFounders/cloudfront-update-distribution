@@ -22,6 +22,15 @@ inputs:
   cloudfront-distribution-config:
     description: "The partial distribution config changes of a valid cloudfront distribution in base64 string"
     required: true
+  cloudfront-invalidation-required:
+    description: "Whether to invalidate the cloudfront distribution"
+    required: false
+  cloudfront-invalidation-path:
+    description: "Path to invalidate in the cloudfront distribution"
+    required: false
+  cloudfront-wait-for-service-update:
+    description: "Whether to wait for the cloudfront distribution to be updated"
+    required: false
 outputs:
   cloudfront-distribution-updated-id: # id of output
     description: "The Id of a cloudfront distribution"

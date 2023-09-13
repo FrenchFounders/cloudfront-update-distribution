@@ -17,6 +17,9 @@ Add the following step to your workflow:
         aws-region: us-east-2
         cloudfront-distribution-id: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
         cloudfront-distribution-config: ${{ env.CLOUDFRONT_DISTRIBUTION_CONFIG_BASE64 }}
+        cloudfront-invalidation-required: true
+        cloudfront-invalidation-path: "/*"
+        cloudfront-wait-for-service-update: false
 ```
 
 For example, you can use this action with the AWS CLI available in [GitHub's hosted virtual environments](https://help.github.com/en/actions/reference/software-installed-on-github-hosted-runners).
@@ -90,6 +93,9 @@ deploy:
         aws-region: ${{ secrets.AWS_REGION }}
         cloudfront-distribution-id: ${{ secrets.AWS_CLOUDFRONT_DISTRIBUTION_ID }}
         cloudfront-distribution-config: ${{ steps.cloudfrontset.outputs.cloudfront_config }}
+        cloudfront-invalidation-required: true
+        cloudfront-invalidation-path: "/*"
+        cloudfront-wait-for-service-update: false
 ```
 
 See [action.yml](action.yml) for the full documentation for this action's inputs and outputs.
